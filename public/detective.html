@@ -6564,11 +6564,15 @@ class GameScene extends Phaser.Scene {
       const card = this.add.container(x, 0);
       const bg = this.add.rectangle(0, 0, cardW, cardH, C.BG_PANEL2, 1).setOrigin(0,0).setStrokeStyle(1, C.MUTE);
       const stripe = this.add.rectangle(0, 0, 3, cardH, C.ACCENT, 1).setOrigin(0,0);
-      const tagColor = meta.type === 'PHYSICAL' ? C.ACCENT : (meta.type === 'TESTIMONY' ? 0xccb333 : 0x8a99a8);
+      const tagColor = meta.type === 'PHYSICAL' ? C.ACCENT : (meta.type === 'TESTIMONY' ? 0xccb333 : (meta.type === 'CONTRADICTION' ? 0xff5566 : 0x8a99a8));
+      const _tagLabel = (meta.type === 'CONTRADICTION') ? 'CTR' : meta.type.slice(0,3);
       const tagBg = this.add.rectangle(cardW-50, 6, 44, 12, 0x000000, 0).setOrigin(0,0).setStrokeStyle(1, tagColor);
-      const tagTx = this.add.text(cardW-28, 12, meta.type.slice(0,3), { fontFamily: F.MONO, fontSize:'8px', color:'#'+tagColor.toString(16).padStart(6,'0'), letterSpacing:1 }).setOrigin(0.5);
-      const title = this.add.text(10, 14, id.length > 18 ? id.slice(0,17)+'…' : id, { fontFamily: F.UI, fontSize:'12px', fontStyle:'700', color:C.LIGHT_S, letterSpacing:1 });
-      const room = this.add.text(10, 30, '> ' + meta.room, { fontFamily: F.MONO, fontSize:'9px', color:C.MUTE_S, letterSpacing:1 });
+      const tagTx = this.add.text(cardW-28, 12, _tagLabel, { fontFamily: F.MONO, fontSize:'8px', color:'#'+tagColor.toString(16).padStart(6,'0'), letterSpacing:1 }).setOrigin(0.5);
+      const _titleStr = _isCtr ? ('CONTRADICTION #' + _ctrNum) : (id.length > 18 ? id.slice(0,17)+'…' : id);
+      const _titleColor = _isCtr ? '#ff8899' : C.LIGHT_S;
+      const title = this.add.text(10, 14, _titleStr, { fontFamily: F.UI, fontSize:'12px', fontStyle:'700', color:_titleColor, letterSpacing:1 });
+      const _roomStr = _isCtr && _ctrObj ? ('> ' + (_ctrObj.text||'').slice(0,28) + '…') : ('> ' + meta.room);
+      const room = this.add.text(10, 30, _roomStr, { fontFamily: F.MONO, fontSize:'9px', color:C.MUTE_S, letterSpacing:1 });
       const bottomBar = this.add.rectangle(10, cardH-15, cardW-20, 1, 0x3d3624).setOrigin(0,0);
       const bottomTag = this.add.text(10, cardH-12, '· COLLECTED', { fontFamily: F.MONO, fontSize:'8px', color:C.ACCENT_S, letterSpacing:1 });
 
@@ -8506,15 +8510,19 @@ class GameScene extends Phaser.Scene {
       const card = this.add.container(x, 0);
       const bg = this.add.rectangle(0, 0, cardW, cardH, C.BG_PANEL2, 1).setOrigin(0,0).setStrokeStyle(1, C.MUTE);
       const stripe = this.add.rectangle(0, 0, 3, cardH, C.ACCENT, 1).setOrigin(0,0);
-      const tagColor = meta.type === 'PHYSICAL' ? C.ACCENT : (meta.type === 'TESTIMONY' ? 0xc49a2a : 0x8aa6c8);
+      const tagColor = meta.type === 'PHYSICAL' ? C.ACCENT : (meta.type === 'TESTIMONY' ? 0xc49a2a : (meta.type === 'CONTRADICTION' ? 0xff5566 : 0x8aa6c8));
+      const _tagLabel = (meta.type === 'CONTRADICTION') ? 'CTR' : meta.type.slice(0,3);
       const tagBg = this.add.rectangle(cardW-50, 6, 44, 12, 0x000000, 0).setOrigin(0,0).setStrokeStyle(1, tagColor);
-      const tagTx = this.add.text(cardW-28, 12, meta.type.slice(0,3), {
+      const tagTx = this.add.text(cardW-28, 12, _tagLabel, {
         fontFamily: F.MONO, fontSize:'8px', color:'#'+tagColor.toString(16).padStart(6,'0'), letterSpacing:1
       }).setOrigin(0.5);
-      const title = this.add.text(10, 14, id.length > 18 ? id.slice(0,17)+'…' : id, {
-        fontFamily: F.UI, fontSize:'12px', fontStyle:'700', color:C.LIGHT_S, letterSpacing:1
+      const _titleStr = _isCtr ? ('CONTRADICTION #' + _ctrNum) : (id.length > 18 ? id.slice(0,17)+'…' : id);
+      const _titleColor = _isCtr ? '#ff8899' : C.LIGHT_S;
+      const title = this.add.text(10, 14, _titleStr, {
+        fontFamily: F.UI, fontSize:'12px', fontStyle:'700', color:_titleColor, letterSpacing:1
       });
-      const room = this.add.text(10, 30, '> ' + meta.room, {
+      const _roomStr = _isCtr && _ctrObj ? ('> ' + (_ctrObj.text||'').slice(0,28) + '…') : ('> ' + meta.room);
+      const room = this.add.text(10, 30, _roomStr, {
         fontFamily: F.MONO, fontSize:'9px', color:C.MUTE_S, letterSpacing:1
       });
       const bottomBar = this.add.rectangle(10, cardH-15, cardW-20, 1, 0x342a2a).setOrigin(0,0);
