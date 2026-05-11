@@ -1050,20 +1050,29 @@ window.__drawRoomDetails = function(scene, caseId, room) {
       // overhead light catches cover surface
       ELL(480,460,360,40,0xeef8ff,0.10);
       // bloody drag marks - wet edges
-      for (let i=0;i<7;i++){ const dx = 770-i*34; const dw = 60-i*6; R(dx-dw/2,560-i*4,dw,8,0x4a0d0d,0.85); LINE(dx-dw/2,558-i*4,dx+dw/2,558-i*4,0xff7788,0.30,1); }
+      for (let i=0;i<10;i++){ const t=i/9; const dx = 760-i*15; const dy = 590-i*30; const dw = 80-i*7; R(dx-dw/2,dy,dw,7-i*0.4,0x4a0d0d,0.90-t*0.25); LINE(dx-dw/2,dy-1,dx+dw/2,dy-1,0xff7788,0.35-t*0.20,1); }
       // broken wheelchair in corner
       FSHADOW(845,612,80,12);
       CIR(840,580,22,0x222233,1.0); STROKE_CIR(840,580,22,0x666677,0.8,2);
       CIR(880,590,16,0x222233,1.0); STROKE_CIR(880,590,16,0x666677,0.8,2);
       R(820,540,70,16,0x444455,1.0); LIT_TOP(820,538,70,0xaaccdd,0.40);
-      R(872,495,12,50,0x444455,1.0);
-      TRI(884,495, -2,0, 12,0, -16,-30, 0x444455, 1.0);
+      // tilted backrest (wheelchair thrown at angle)
+      TRI(872,545, 0,0, 14,0, -20,-50, 0x444455, 1.0);
+      TRI(872,545, 0,0, 14,2, -20,-48, 0x6b7080, 0.60);
+      LINE(872,545,852,495,0x6b7080,0.85,2);
       R(810,612,24,12,0x111111,1.0);
       CIR(820,618,4,0x444466,1.0);
       // steam from sauna door (lit from above)
       const _steamA = ELL(165,130,40,16,0xddeeff,0.40);
       const _steamB = ELL(180,108,32,12,0xddeeff,0.30);
       LIT_TOP(145,124,40,0xffffff,0.30);
+      // === sauna camera (under wheelchair, dropped on floor) ===
+      FSHADOW(885,558,32,5);
+      R(870,530,30,18,0x222230,1.0);          // camera body
+      R(870,528,30,2,0xaaccdd,0.55);          // top highlight
+      CIR(885,539,5,0x080a10,1.0);            // lens housing
+      CIR(885,539,3,0x4fc3f7,0.85);           // lens glass
+      const _saunaCamLed = CIR(896,533,1.5,0xff3344,0.95); TW(_saunaCamLed,{alpha:0.25},1500);
       CORNERS_DARK();
       // animations
       const _saunaPool = STROKE_ELL(480,490,520,200,0x4fc3f7,0.7,3); TW(_saunaPool,{alpha:0.30},2800);
@@ -1182,6 +1191,13 @@ window.__drawRoomDetails = function(scene, caseId, room) {
       R(70,150,140,140,0x080a10,1.0);
       R(60,138,160,3,0xeef8ff,0.50); // glass top highlight
       for (let i=0;i<4;i++){ const ky = 170+i*30; R(80,ky,120,4,0x9aa0ad,1.0); R(80,ky-8,12,8,0x6b4a2a,1.0); }
+      // === kitchen camera (turned to face wall — back of camera visible) ===
+      FSHADOW(735,402,28,4);
+      R(720,378,30,28,0x2a2f3a,1.0);          // back plate (rectangular)
+      R(720,376,30,2,0xaaccdd,0.45);          // top edge highlight
+      R(748,382,3,20,0x111118,1.0);           // mounting bracket
+      for (let i=0;i<4;i++) LINE(724,384+i*5,746,384+i*5,0x080a10,0.85,1); // ventilation slats
+      R(724,396,4,4,0x4a5566,1.0);            // tiny screw
       // trash bin in corner - 3D, one face lit
       BOX(820,500,80,100,8,0x222630,0x3a3f4a,0x080a10);
       LIT_TOP(820,498,80,0xeef8ff,0.30);
@@ -1245,6 +1261,13 @@ window.__drawRoomDetails = function(scene, caseId, room) {
       // foreground (closer) booth — bigger
       R(60,500,840,40,0x4a1010,1.0);
       R(60,498,840,3,0xff5566,0.30);
+      // === dining camera (corner-mounted, surveying room) ===
+      R(870,90,18,12,0x111118,1.0);           // mounting bracket
+      R(862,100,32,22,0x2a2f3a,1.0);          // body housing
+      R(862,100,32,2,0xeef8ff,0.40);          // top highlight
+      CIR(880,118,6,0x080a10,1.0);            // lens housing
+      CIR(880,118,4,0xddaa66,0.65);           // lens glass (warm reflection)
+      const _diningCamLed = CIR(890,107,1.5,0xff3344,0.95); TW(_diningCamLed,{alpha:0.25},1700);
       CORNERS_DARK();
       // animations
       const _dining1 = CIR(180,108,30,0xffeebb,0.32); TW(_dining1,{alpha:0.10},2800);
@@ -3007,11 +3030,11 @@ class GameScene extends Phaser.Scene {
 
   buildFilterButtons() {
     this.filter = 'ALL';
-    const labels = ['ALL', 'PHYSICAL', 'TESTIMONY', 'DOCUMENT'];
+    const labels = ['ALL', 'PHYSICAL', 'TESTIMONY', 'DOCUMENT', 'CONTRADICTION'];
     this.filterBtns = {};
     let x = 14;
     labels.forEach(l => {
-      const w = (l === 'ALL') ? 60 : 100;
+      const w = (l === 'ALL') ? 50 : (l === 'CONTRADICTION' ? 130 : 92);
       const btn = this.add.container(x, 50);
       const bg = this.add.rectangle(0, 0, w, 22, C.BG_PANEL, 1).setOrigin(0,0).setStrokeStyle(1, C.MUTE);
       const txt = this.add.text(w/2, 11, l, { fontFamily: F.UI, fontSize:'11px', fontStyle:'700', color:C.MUTE_S, letterSpacing:2 }).setOrigin(0.5);
@@ -3069,8 +3092,12 @@ class GameScene extends Phaser.Scene {
       else { o.bg.setFillStyle(C.BG_PANEL, 1).setStrokeStyle(1, C.MUTE); o.txt.setColor(C.MUTE_S); }
     });
 
-    const evs = this.gs.collectedEvidence.filter(id => {
+    const _ctrIds = (this.gs.contradictionsTriggered||[]).map(n => '__CTR_' + n);
+    let _all = this.gs.collectedEvidence.slice().concat(_ctrIds);
+    const evs = _all.filter(id => {
+      if (id.indexOf('__CTR_') === 0) return (this.filter === 'ALL' || this.filter === 'CONTRADICTION');
       if (this.filter === 'ALL') return true;
+      if (this.filter === 'CONTRADICTION') return false;
       return EVIDENCE_META[id] && EVIDENCE_META[id].type === this.filter;
     });
 
@@ -3087,23 +3114,31 @@ class GameScene extends Phaser.Scene {
       const idx = i + this.cardScroll;
       if (idx >= evs.length) break;
       const id = evs[idx];
-      const meta = EVIDENCE_META[id];
+      const _isCtr = (typeof id === 'string' && id.indexOf('__CTR_') === 0);
+      const _ctrNum = _isCtr ? parseInt(id.slice(6),10) : 0;
+      const _ctrObj = _isCtr ? (typeof CONTRADICTIONS!=='undefined' ? CONTRADICTIONS.find(c=>c.id===_ctrNum) : null) : null;
+      const meta = _isCtr ? { type:'CONTRADICTION', room:'EVIDENCE LINK' } : EVIDENCE_META[id];
       const x = i * (cardW + gap);
 
       const card = this.add.container(x, 0);
       const bg = this.add.rectangle(0, 0, cardW, cardH, C.BG_PANEL2, 1).setOrigin(0,0).setStrokeStyle(1, C.MUTE);
       const stripe = this.add.rectangle(0, 0, 3, cardH, C.ACCENT, 1).setOrigin(0,0);
-      const tagColor = meta.type === 'PHYSICAL' ? C.ACCENT : (meta.type === 'TESTIMONY' ? 0xc49a2a : 0x8aa6c8);
+      const tagColor = meta.type === 'PHYSICAL' ? C.ACCENT : (meta.type === 'TESTIMONY' ? 0xc49a2a : (meta.type === 'CONTRADICTION' ? 0xff5566 : 0x8aa6c8));
+      const _tagLabel = (meta.type === 'CONTRADICTION') ? 'CTR' : meta.type.slice(0,3);
       const tagBg = this.add.rectangle(cardW-50, 6, 44, 12, 0x000000, 0).setOrigin(0,0).setStrokeStyle(1, tagColor);
-      const tagTx = this.add.text(cardW-28, 12, meta.type.slice(0,3), { fontFamily: F.MONO, fontSize:'8px', color:'#'+tagColor.toString(16).padStart(6,'0'), letterSpacing:1 }).setOrigin(0.5);
-      const title = this.add.text(10, 14, id.length > 18 ? id.slice(0,17)+'…' : id, { fontFamily: F.UI, fontSize:'12px', fontStyle:'700', color:C.LIGHT_S, letterSpacing:1 });
-      const room = this.add.text(10, 30, '> ' + meta.room, { fontFamily: F.MONO, fontSize:'9px', color:C.MUTE_S, letterSpacing:1 });
+      const tagTx = this.add.text(cardW-28, 12, _tagLabel, { fontFamily: F.MONO, fontSize:'8px', color:'#'+tagColor.toString(16).padStart(6,'0'), letterSpacing:1 }).setOrigin(0.5);
+      const _titleStr = _isCtr ? ('CONTRADICTION #' + _ctrNum) : (id.length > 18 ? id.slice(0,17)+'…' : id);
+      const _titleColor = _isCtr ? '#ff8899' : C.LIGHT_S;
+      const title = this.add.text(10, 14, _titleStr, { fontFamily: F.UI, fontSize:'12px', fontStyle:'700', color:_titleColor, letterSpacing:1 });
+      const _roomStr = _isCtr && _ctrObj ? ('> ' + (_ctrObj.text||'').slice(0,28) + '…') : ('> ' + meta.room);
+      const room = this.add.text(10, 30, _roomStr, { fontFamily: F.MONO, fontSize:'9px', color:C.MUTE_S, letterSpacing:1 });
       const bottomBar = this.add.rectangle(10, cardH-15, cardW-20, 1, 0x261645).setOrigin(0,0);
       const bottomTag = this.add.text(10, cardH-12, '· COLLECTED', { fontFamily: F.MONO, fontSize:'8px', color:C.ACCENT_S, letterSpacing:1 });
 
       card.add([bg, stripe, tagBg, tagTx, title, room, bottomBar, bottomTag]);
       bg.setInteractive({ useHandCursor: true });
-      bg.on('pointerdown', () => window.openEvidenceModal('void', id));
+      if (_isCtr) { stripe.setFillStyle(0xff5566, 1); bottomTag.setText('· CONTRADICTION'); bottomTag.setColor('#ff8899'); }
+      bg.on('pointerdown', () => { if (_isCtr) { this.showContradictionOverlay(_ctrNum); } else { window.openEvidenceModal('void', id); } });
     
       if (id === this._newestEvidence) {
         card.setScale(0.6); card.setAlpha(0);
@@ -3331,13 +3366,22 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  showContradictionOverlay(id) { this._renderContradictionOverlay(id); }
   fireContradiction(id) {
     const c = CONTRADICTIONS.find(x => x.id === id);
     if (!c) return;
-    if (this.gs.contradictionsTriggered.includes(id)) return;
-    this.gs.contradictionsTriggered.push(id);
-    this.refreshHeader();
+    if (!this.gs.contradictionsTriggered.includes(id)) {
+      this.gs.contradictionsTriggered.push(id);
+      this.refreshHeader();
+      if (this.refreshEvidenceCards) this.refreshEvidenceCards();
+    }
 
+    this._renderContradictionOverlay(id);
+  }
+
+  _renderContradictionOverlay(id) {
+    const c = CONTRADICTIONS.find(x => x.id === id);
+    if (!c) return;
     const layer = this.contraLayer;
     layer.removeAll(true);
     layer.setVisible(true).setAlpha(0);
@@ -3920,16 +3964,16 @@ const HOTSPOTS = {
               P('Three stab wounds to the abdomen. Massive blood loss.'),
               P('The pool cover was activated to hide the body.') ],
       collect:'VICTIM AUTOPSY' },
-    { id:'dragmarks', label:'BLOODY DRAG MARKS', x:340, y:510,
+    { id:'dragmarks', label:'BLOODY DRAG MARKS', x:640, y:560,
       lines:[ P('A trail of blood leading from the floor right up to the pool edge.'),
               P('The victim was stabbed outside the pool, then dragged in.') ],
       collect:'BLOODY DRAG MARKS' },
-    { id:'wheelchair', label:'BROKEN WHEELCHAIR', x:740, y:455,
+    { id:'wheelchair', label:'BROKEN WHEELCHAIR', x:845, y:575,
       lines:[ P('The Photographer\'s wheelchair. It is broken in the corner.'),
               P('The Assistant is knocked out underneath it.'),
               P('It was thrown with immense force.') ],
       collect:'BROKEN WHEELCHAIR' },
-    { id:'saunacamera', label:'SAUNA CAMERA', x:830, y:548,
+    { id:'saunacamera', label:'SAUNA CAMERA', x:885, y:545,
       lines:[ P('Found under the broken wheelchair. It still works.'),
               P('Photo 1 (2:05 PM): Setting up the camera.'),
               P('Photo 2 (2:45 PM): The Victim and The Suspect walking into the sauna together.'),
@@ -3946,7 +3990,7 @@ const HOTSPOTS = {
               P('But they were tied shut with nylon camera straps.'),
               P('The straps are now on the floor. Cut.') ],
       collect:'KNIFE CABINET' },
-    { id:'straps', label:'CUT STRAPS', x:375, y:392,
+    { id:'straps', label:'CUT STRAPS', x:160, y:455,
       lines:[ P('Nylon straps from the cameras.'),
               P('Cut in a messy way.'),
               P('The killer needed access to the knives.') ],
@@ -3955,7 +3999,7 @@ const HOTSPOTS = {
       lines:[ P('A sharp hoof knife was discarded in here.'),
               P('It must have been used to cut the thick nylon straps.') ],
       collect:'HOOF KNIFE' },
-    { id:'kitchencamera', label:'KITCHEN CAMERA', x:700, y:315,
+    { id:'kitchencamera', label:'KITCHEN CAMERA', x:735, y:392,
       lines:[ P('The interval camera on the counter.'),
               P('Photo 1 (2:07 PM): Setup.'),
               P('Photo 2 (2:27 PM): Photographer grabbing bread.'),
@@ -3965,7 +4009,7 @@ const HOTSPOTS = {
       after:'logs_panel' }
   ],
   dining: [
-    { id:'diningcam', label:'DINING CAMERA', x:810, y:138,
+    { id:'diningcam', label:'DINING CAMERA', x:885, y:115,
       lines:[ P('Interval camera in the corner.'),
               P('Photo 1 (2:10 PM): Setup.'),
               P('Photo 2 (2:30 PM): Photographer eating bread.') ] },
@@ -4730,11 +4774,11 @@ class GameScene extends Phaser.Scene {
 
   buildFilterButtons() {
     this.filter = 'ALL';
-    const labels = ['ALL', 'PHYSICAL', 'TESTIMONY', 'DOCUMENT'];
+    const labels = ['ALL', 'PHYSICAL', 'TESTIMONY', 'DOCUMENT', 'CONTRADICTION'];
     this.filterBtns = {};
     let x = 14;
     labels.forEach(l => {
-      const w = (l === 'ALL') ? 60 : 100;
+      const w = (l === 'ALL') ? 50 : (l === 'CONTRADICTION' ? 130 : 92);
       const btn = this.add.container(x, 50);
       const bg = this.add.rectangle(0, 0, w, 22, C.BG_PANEL, 1).setOrigin(0,0).setStrokeStyle(1, C.MUTE);
       const txt = this.add.text(w/2, 11, l, { fontFamily: F.UI, fontSize:'11px', fontStyle:'700', color:C.MUTE_S, letterSpacing:2 }).setOrigin(0.5);
@@ -4792,8 +4836,12 @@ class GameScene extends Phaser.Scene {
       else { o.bg.setFillStyle(C.BG_PANEL, 1).setStrokeStyle(1, C.MUTE); o.txt.setColor(C.MUTE_S); }
     });
 
-    const evs = this.gs.collectedEvidence.filter(id => {
+    const _ctrIds = (this.gs.contradictionsTriggered||[]).map(n => '__CTR_' + n);
+    let _all = this.gs.collectedEvidence.slice().concat(_ctrIds);
+    const evs = _all.filter(id => {
+      if (id.indexOf('__CTR_') === 0) return (this.filter === 'ALL' || this.filter === 'CONTRADICTION');
       if (this.filter === 'ALL') return true;
+      if (this.filter === 'CONTRADICTION') return false;
       return EVIDENCE_META[id] && EVIDENCE_META[id].type === this.filter;
     });
 
@@ -4810,23 +4858,31 @@ class GameScene extends Phaser.Scene {
       const idx = i + this.cardScroll;
       if (idx >= evs.length) break;
       const id = evs[idx];
-      const meta = EVIDENCE_META[id];
+      const _isCtr = (typeof id === 'string' && id.indexOf('__CTR_') === 0);
+      const _ctrNum = _isCtr ? parseInt(id.slice(6),10) : 0;
+      const _ctrObj = _isCtr ? (typeof CONTRADICTIONS!=='undefined' ? CONTRADICTIONS.find(c=>c.id===_ctrNum) : null) : null;
+      const meta = _isCtr ? { type:'CONTRADICTION', room:'EVIDENCE LINK' } : EVIDENCE_META[id];
       const x = i * (cardW + gap);
 
       const card = this.add.container(x, 0);
       const bg = this.add.rectangle(0, 0, cardW, cardH, C.BG_PANEL2, 1).setOrigin(0,0).setStrokeStyle(1, C.MUTE);
       const stripe = this.add.rectangle(0, 0, 3, cardH, C.ACCENT, 1).setOrigin(0,0);
-      const tagColor = meta.type === 'PHYSICAL' ? C.ACCENT : (meta.type === 'TESTIMONY' ? 0xc49a2a : 0x8aa6c8);
+      const tagColor = meta.type === 'PHYSICAL' ? C.ACCENT : (meta.type === 'TESTIMONY' ? 0xc49a2a : (meta.type === 'CONTRADICTION' ? 0xff5566 : 0x8aa6c8));
+      const _tagLabel = (meta.type === 'CONTRADICTION') ? 'CTR' : meta.type.slice(0,3);
       const tagBg = this.add.rectangle(cardW-50, 6, 44, 12, 0x000000, 0).setOrigin(0,0).setStrokeStyle(1, tagColor);
-      const tagTx = this.add.text(cardW-28, 12, meta.type.slice(0,3), { fontFamily: F.MONO, fontSize:'8px', color:'#'+tagColor.toString(16).padStart(6,'0'), letterSpacing:1 }).setOrigin(0.5);
-      const title = this.add.text(10, 14, id.length > 18 ? id.slice(0,17)+'…' : id, { fontFamily: F.UI, fontSize:'12px', fontStyle:'700', color:C.LIGHT_S, letterSpacing:1 });
-      const room = this.add.text(10, 30, '> ' + meta.room, { fontFamily: F.MONO, fontSize:'9px', color:C.MUTE_S, letterSpacing:1 });
+      const tagTx = this.add.text(cardW-28, 12, _tagLabel, { fontFamily: F.MONO, fontSize:'8px', color:'#'+tagColor.toString(16).padStart(6,'0'), letterSpacing:1 }).setOrigin(0.5);
+      const _titleStr = _isCtr ? ('CONTRADICTION #' + _ctrNum) : (id.length > 18 ? id.slice(0,17)+'…' : id);
+      const _titleColor = _isCtr ? '#ff8899' : C.LIGHT_S;
+      const title = this.add.text(10, 14, _titleStr, { fontFamily: F.UI, fontSize:'12px', fontStyle:'700', color:_titleColor, letterSpacing:1 });
+      const _roomStr = _isCtr && _ctrObj ? ('> ' + (_ctrObj.text||'').slice(0,28) + '…') : ('> ' + meta.room);
+      const room = this.add.text(10, 30, _roomStr, { fontFamily: F.MONO, fontSize:'9px', color:C.MUTE_S, letterSpacing:1 });
       const bottomBar = this.add.rectangle(10, cardH-15, cardW-20, 1, 0x102618).setOrigin(0,0);
       const bottomTag = this.add.text(10, cardH-12, '· COLLECTED', { fontFamily: F.MONO, fontSize:'8px', color:C.ACCENT_S, letterSpacing:1 });
 
       card.add([bg, stripe, tagBg, tagTx, title, room, bottomBar, bottomTag]);
       bg.setInteractive({ useHandCursor: true });
-      bg.on('pointerdown', () => window.openEvidenceModal('atlantic', id));
+      if (_isCtr) { stripe.setFillStyle(0xff5566, 1); bottomTag.setText('· CONTRADICTION'); bottomTag.setColor('#ff8899'); }
+      bg.on('pointerdown', () => { if (_isCtr) { this.showContradictionOverlay(_ctrNum); } else { window.openEvidenceModal('atlantic', id); } });
     
       if (id === this._newestEvidence) {
         card.setScale(0.6); card.setAlpha(0);
@@ -5054,13 +5110,22 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  showContradictionOverlay(id) { this._renderContradictionOverlay(id); }
   fireContradiction(id) {
     const c = CONTRADICTIONS.find(x => x.id === id);
     if (!c) return;
-    if (this.gs.contradictionsTriggered.includes(id)) return;
-    this.gs.contradictionsTriggered.push(id);
-    this.refreshHeader();
+    if (!this.gs.contradictionsTriggered.includes(id)) {
+      this.gs.contradictionsTriggered.push(id);
+      this.refreshHeader();
+      if (this.refreshEvidenceCards) this.refreshEvidenceCards();
+    }
 
+    this._renderContradictionOverlay(id);
+  }
+
+  _renderContradictionOverlay(id) {
+    const c = CONTRADICTIONS.find(x => x.id === id);
+    if (!c) return;
     const layer = this.contraLayer;
     layer.removeAll(true);
     layer.setVisible(true).setAlpha(0);
@@ -6406,11 +6471,11 @@ class GameScene extends Phaser.Scene {
 
   buildFilterButtons() {
     this.filter = 'ALL';
-    const labels = ['ALL', 'PHYSICAL', 'TESTIMONY', 'DOCUMENT'];
+    const labels = ['ALL', 'PHYSICAL', 'TESTIMONY', 'DOCUMENT', 'CONTRADICTION'];
     this.filterBtns = {};
     let x = 14;
     labels.forEach(l => {
-      const w = (l === 'ALL') ? 60 : 100;
+      const w = (l === 'ALL') ? 50 : (l === 'CONTRADICTION' ? 130 : 92);
       const btn = this.add.container(x, 50);
       const bg = this.add.rectangle(0, 0, w, 22, C.BG_PANEL, 1).setOrigin(0,0).setStrokeStyle(1, C.MUTE);
       const txt = this.add.text(w/2, 11, l, { fontFamily: F.UI, fontSize:'11px', fontStyle:'700', color:C.MUTE_S, letterSpacing:2 }).setOrigin(0.5);
@@ -6468,8 +6533,12 @@ class GameScene extends Phaser.Scene {
       else { o.bg.setFillStyle(C.BG_PANEL, 1).setStrokeStyle(1, C.MUTE); o.txt.setColor(C.MUTE_S); }
     });
 
-    const evs = this.gs.collectedEvidence.filter(id => {
+    const _ctrIds = (this.gs.contradictionsTriggered||[]).map(n => '__CTR_' + n);
+    let _all = this.gs.collectedEvidence.slice().concat(_ctrIds);
+    const evs = _all.filter(id => {
+      if (id.indexOf('__CTR_') === 0) return (this.filter === 'ALL' || this.filter === 'CONTRADICTION');
       if (this.filter === 'ALL') return true;
+      if (this.filter === 'CONTRADICTION') return false;
       return EVIDENCE_META[id] && EVIDENCE_META[id].type === this.filter;
     });
 
@@ -6486,7 +6555,10 @@ class GameScene extends Phaser.Scene {
       const idx = i + this.cardScroll;
       if (idx >= evs.length) break;
       const id = evs[idx];
-      const meta = EVIDENCE_META[id];
+      const _isCtr = (typeof id === 'string' && id.indexOf('__CTR_') === 0);
+      const _ctrNum = _isCtr ? parseInt(id.slice(6),10) : 0;
+      const _ctrObj = _isCtr ? (typeof CONTRADICTIONS!=='undefined' ? CONTRADICTIONS.find(c=>c.id===_ctrNum) : null) : null;
+      const meta = _isCtr ? { type:'CONTRADICTION', room:'EVIDENCE LINK' } : EVIDENCE_META[id];
       const x = i * (cardW + gap);
 
       const card = this.add.container(x, 0);
@@ -6502,7 +6574,8 @@ class GameScene extends Phaser.Scene {
 
       card.add([bg, stripe, tagBg, tagTx, title, room, bottomBar, bottomTag]);
       bg.setInteractive({ useHandCursor: true });
-      bg.on('pointerdown', () => window.openEvidenceModal('hope', id));
+      if (_isCtr) { stripe.setFillStyle(0xff5566, 1); bottomTag.setText('· CONTRADICTION'); bottomTag.setColor('#ff8899'); }
+      bg.on('pointerdown', () => { if (_isCtr) { this.showContradictionOverlay(_ctrNum); } else { window.openEvidenceModal('hope', id); } });
     
       if (id === this._newestEvidence) {
         card.setScale(0.6); card.setAlpha(0);
@@ -6733,13 +6806,22 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  showContradictionOverlay(id) { this._renderContradictionOverlay(id); }
   fireContradiction(id) {
     const c = CONTRADICTIONS.find(x => x.id === id);
     if (!c) return;
-    if (this.gs.contradictionsTriggered.includes(id)) return;
-    this.gs.contradictionsTriggered.push(id);
-    this.refreshHeader();
+    if (!this.gs.contradictionsTriggered.includes(id)) {
+      this.gs.contradictionsTriggered.push(id);
+      this.refreshHeader();
+      if (this.refreshEvidenceCards) this.refreshEvidenceCards();
+    }
 
+    this._renderContradictionOverlay(id);
+  }
+
+  _renderContradictionOverlay(id) {
+    const c = CONTRADICTIONS.find(x => x.id === id);
+    if (!c) return;
     const layer = this.contraLayer;
     layer.removeAll(true);
     layer.setVisible(true).setAlpha(0);
@@ -8321,11 +8403,11 @@ class GameScene extends Phaser.Scene {
 
   buildFilterButtons() {
     this.filter = 'ALL';
-    const labels = ['ALL', 'PHYSICAL', 'TESTIMONY', 'DOCUMENT'];
+    const labels = ['ALL', 'PHYSICAL', 'TESTIMONY', 'DOCUMENT', 'CONTRADICTION'];
     this.filterBtns = {};
     let x = 14;
     labels.forEach(l => {
-      const w = (l === 'ALL') ? 60 : 100;
+      const w = (l === 'ALL') ? 50 : (l === 'CONTRADICTION' ? 130 : 92);
       const btn = this.add.container(x, 50);
       const bg = this.add.rectangle(0, 0, w, 22, C.BG_PANEL, 1).setOrigin(0,0).setStrokeStyle(1, C.MUTE);
       const txt = this.add.text(w/2, 11, l, {
@@ -8393,8 +8475,12 @@ class GameScene extends Phaser.Scene {
       else { o.bg.setFillStyle(C.BG_PANEL, 1).setStrokeStyle(1, C.MUTE); o.txt.setColor(C.MUTE_S); }
     });
 
-    const evs = this.gs.collectedEvidence.filter(id => {
+    const _ctrIds = (this.gs.contradictionsTriggered||[]).map(n => '__CTR_' + n);
+    let _all = this.gs.collectedEvidence.slice().concat(_ctrIds);
+    const evs = _all.filter(id => {
+      if (id.indexOf('__CTR_') === 0) return (this.filter === 'ALL' || this.filter === 'CONTRADICTION');
       if (this.filter === 'ALL') return true;
+      if (this.filter === 'CONTRADICTION') return false;
       return EVIDENCE_META[id] && EVIDENCE_META[id].type === this.filter;
     });
 
@@ -8411,7 +8497,10 @@ class GameScene extends Phaser.Scene {
       const idx = i + this.cardScroll;
       if (idx >= evs.length) break;
       const id = evs[idx];
-      const meta = EVIDENCE_META[id];
+      const _isCtr = (typeof id === 'string' && id.indexOf('__CTR_') === 0);
+      const _ctrNum = _isCtr ? parseInt(id.slice(6),10) : 0;
+      const _ctrObj = _isCtr ? (typeof CONTRADICTIONS!=='undefined' ? CONTRADICTIONS.find(c=>c.id===_ctrNum) : null) : null;
+      const meta = _isCtr ? { type:'CONTRADICTION', room:'EVIDENCE LINK' } : EVIDENCE_META[id];
       const x = i * (cardW + gap);
 
       const card = this.add.container(x, 0);
@@ -8435,7 +8524,8 @@ class GameScene extends Phaser.Scene {
 
       card.add([bg, stripe, tagBg, tagTx, title, room, bottomBar, bottomTag]);
       bg.setInteractive({ useHandCursor: true });
-      bg.on('pointerdown', () => window.openEvidenceModal('starry', id));
+      if (_isCtr) { stripe.setFillStyle(0xff5566, 1); bottomTag.setText('· CONTRADICTION'); bottomTag.setColor('#ff8899'); }
+      bg.on('pointerdown', () => { if (_isCtr) { this.showContradictionOverlay(_ctrNum); } else { window.openEvidenceModal('starry', id); } });
     
       if (id === this._newestEvidence) {
         card.setScale(0.6); card.setAlpha(0);
@@ -8718,13 +8808,22 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  showContradictionOverlay(id) { this._renderContradictionOverlay(id); }
   fireContradiction(id) {
     const c = CONTRADICTIONS.find(x => x.id === id);
     if (!c) return;
-    if (this.gs.contradictionsTriggered.includes(id)) return;
-    this.gs.contradictionsTriggered.push(id);
-    this.refreshHeader();
+    if (!this.gs.contradictionsTriggered.includes(id)) {
+      this.gs.contradictionsTriggered.push(id);
+      this.refreshHeader();
+      if (this.refreshEvidenceCards) this.refreshEvidenceCards();
+    }
 
+    this._renderContradictionOverlay(id);
+  }
+
+  _renderContradictionOverlay(id) {
+    const c = CONTRADICTIONS.find(x => x.id === id);
+    if (!c) return;
     const layer = this.contraLayer;
     layer.removeAll(true);
     layer.setVisible(true).setAlpha(0);
